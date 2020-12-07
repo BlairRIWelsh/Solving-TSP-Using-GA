@@ -5,13 +5,13 @@ clear all;
 load('xy.mat');
 chromasome_size = size(xy,1);
 
-iter = 1000;                    % Number of iterations: repeat "iter" times 
-population_size = 200;           % Number of chromosomes in population
+iter = 100000;                    % Number of iterations: repeat "iter" times 
+population_size = 500;           % Number of chromosomes in population
 replacementChoice = "elitism";
 selectionChoice = 'roulette';
-crossoverChoice = 'cx2';    % CHOICES: 'pmx', 'cx2', 'ox'
+crossoverChoice = 'pmx';
 crossoverProbability = 0.8;
-mutationChoice = "rsm";   % CHOICES: 'twors', 'thrors', 'rsm'
+mutationChoice = "twors";
 mutationProbability = 0.2;
 
 displayShortestDistOverEveryGenPlot = true;

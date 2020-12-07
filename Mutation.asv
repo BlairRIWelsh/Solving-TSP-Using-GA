@@ -11,8 +11,8 @@ function [temp_chromosome_1,temp_chromosome_2] = Mutation(temp_chromosome_1,temp
                 temp_chromosome_2 = MutationTwors(temp_chromosome_2);
             case 'thrors'
                 % Thrors mutation
-                temp_chromosome_1 = MutationThrors(temp_chromosome_1);
-                temp_chromosome_2 = MutationThrors(temp_chromosome_2);
+                temp_chromosome_1 = MutationThoras(temp_chromosome_1);
+                temp_chromosome_2 = MutationThoras(temp_chromosome_2);
             case 'rsm'
                 % Reverse Sequence Mutation (RSM)
                 temp_chromosome_1 = MutationRSM(temp_chromosome_1);
@@ -28,26 +28,7 @@ function mutatedChromasome = MutationTwors(chromasome)
     mutatedChromasome = chromasome;
     mutatedChromasome(lb) = gene2;
     mutatedChromasome(ub) = gene1;
-
-%% Swap three genes in the given chromasome
-function mutatedChromasome = MutationThrors(chromasome)
-    % Generate 3 Unique Numbers between 1 and Chromasome Size(100)
-    swapPoints = randi([1,size(chromasome,2)],1,3);
-    while numel(swapPoints)~=numel(unique(swapPoints))
-        swapPoints = randi([1,size(chromasome,2)],1,3);
-    end
     
-    % Get 3 genes
-    gene1 = chromasome(swapPoints(1));
-    gene2 = chromasome(swapPoints(2));
-    gene3 = chromasome(swapPoints(3));
-    
-    % Swap 3 genes
-    mutatedChromasome = chromasome;
-    mutatedChromasome(swapPoints(1)) = gene3;
-    mutatedChromasome(swapPoints(2)) = gene1;
-    mutatedChromasome(swapPoints(3)) = gene2;
-
 %% Reverse a randomly gemerated section in the given chromasome
 function mutatedChromasome = MutationRSM(chromasome)
     [lb,ub] = generateCutPoints(size(chromasome,2));
@@ -55,6 +36,9 @@ function mutatedChromasome = MutationRSM(chromasome)
     flippedSection = flip(section);
     mutatedChromasome = chromasome;
     mutatedChromasome(1,lb:ub) = flippedSection;
+
+%% Reverse a randomly gemerated section in the given chromasome
+function mutatedChromasome = MutationRSM(chromasome)
     
 %% Generates two random points from a chromosome guaranteed to be 1 apart from each other
 function [lb,ub] = generateCutPoints(chromosome_size)

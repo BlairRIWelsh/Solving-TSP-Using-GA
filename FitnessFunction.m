@@ -9,11 +9,13 @@ function population = FitnessFunction(population,distances_between_points)
     population = [population zeros(population_size,1)];
     
     for i = 1:population_size
+%         disp(i);
         total_distance = 0;
         % Add distance from point j to point j+1 to total distance 
         % for points 1 to the second last point
         for j = 1:chromasome_size-1
             total_distance = total_distance + distances_between_points(population(i,j), population(i,j+1));
+%             fprintf('(%d,%d) = %d\n',i,j,total_distance);
         end
         % add distance from last point back to point 1
         total_distance = total_distance + distances_between_points(population(i,end -1),population(i,1));

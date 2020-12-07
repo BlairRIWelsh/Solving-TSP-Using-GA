@@ -50,7 +50,7 @@ function [lb,ub] = generateCutPoints(chromosome_size)
     end
     % If numbers are 1 digit away master chromasome be empty so just redo
     if ub-lb == 1
-        [lb,ub] = generateCutPoints();
+        [lb,ub] = generateCutPoints(chromosome_size);
     end
 
 function masterChromosome = crossoverParts(masterChromosome,chromosomePart1,chromosomePart3,mappings)
