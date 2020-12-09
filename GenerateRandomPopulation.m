@@ -1,5 +1,4 @@
-% 
-%
+% Generates a random population of size [population_size x chromasome_size]
 % ---------------------------------------------------------
 function population = GenerateRandomPopulation(population_size,chromasome_size)
     population = zeros(population_size,chromasome_size);

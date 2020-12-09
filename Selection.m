@@ -1,19 +1,77 @@
-% 
-%
+% Offers different types of selection strategies to pick 2 parents from the
+% given population
 % ---------------------------------------------------------
-function [temp_chromosome_1,temp_chromosome_2] = Selection(population,choice)
-    chromasome_size = size(population,2) - 1; 
-    population_size = size(population,1);
-    
+function [temp_chromosome_1,temp_chromosome_2] = Selection(population,choice,tournamentSelectionSize)
     
     switch choice
         case 'roulette'
             %% ROULETTE SELCTION - selects the Chromosomes based on a probability proportional to the fitness
             temp_chromosome_1 = RouletteSelection(population);
             temp_chromosome_2 = RouletteSelection(population);
-        case 'tournament'
+        case 'tournamentWithReplacement'
             %% TOURNAMENT SELECTION -
-            % ???
+            [c1, c2] = tournamentWithReplacement(population,tournamentSelectionSize);
+            temp_chromosome_1 = c1;
+            temp_chromosome_2 = c2;
+        case 'tournamentWithoutReplacement'
+            %% TOURNAMENT SELECTION -
+            temp_chromosome_1 = tournamentWithoutReplacement(population,tournamentSelectionSize);
+            temp_chromosome_2 = tournamentWithoutReplacement(population,tournamentSelectionSize);
     end
+   
+%% Pick a chromosome based on a probability proportional to the fitness
+function temp_chromosome = RouletteSelection(population)
+    chromasome_size = size(population,2) - 1; 
 
+    % Calculate the wieghts of each chromasome surviving and breeding
+    weights= population(:,chromasome_size+1)/sum(population(:,chromasome_size+1));
+    accumulation = cumsum(weights);
+
+    % Pick a chromosome based on a probability proportional to the fitness
+    p = rand();
+    chosen_index = -1;
+    for index = 1 : length(accumulation)
+        if (accumulation(index) > p)
+          chosen_index = index;
+          break;
+        end
+    end
+    choice = chosen_index;
     
+    % Return chosen chromosome
+    temp_chromosome = population(choice, 1:chromasome_size);
+
+%% Randomly select n chromasomes from the population and select the best one from this group
+function temp_chromasome = tournamentWithoutReplacement(population,tournamentSelectionSize)
+    selectedChromasomes = zeros([tournamentSelectionSize,size(population,2)]);
+    
+    for i=1:tournamentSelectionSize                             % Pick n chromosmes at random
+        x = randi(size(population,1));
+        selectedChromasomes(i,:) = population(x,:);
+    end
+    
+    [m,idx] = max(selectedChromasomes(size(population,2)));     % Find index of shortest route
+    temp_chromasome = population(idx,1:size(population,2) - 1); % Return shortest route chromasome
+
+%% Randomly select n chromasomes from the population, removing chromosomes that have been selected already, and select the best one from this group
+function [temp_chromasome_1, temp_chromasome_2] = tournamentWithReplacement(population,tournamentSelectionSize)
+
+    selectedChromasomes = zeros([tournamentSelectionSize,size(population,2)]);
+    usedChromasomes = zeros(tournamentSelectionSize*2);
+    
+    for loop = 1:2
+        for i=1:tournamentSelectionSize 
+            x = randi(size(population,1)); % Genrate a random number between 1 and population size
+            while ismember(x, usedChromasomes) % If that number has been used create another one
+                x = randi(size(population,1));
+            end
+            selectedChromasomes(i,:) = population(x,:);
+            usedChromasomes(i) = x;
+        end
+        [m,idx] = max(selectedChromasomes(size(population,2)));
+        if loop == 1
+            temp_chromasome_1 = population(idx,1:size(population,2) - 1);
+        else
+            temp_chromasome_2 = population(idx,1:size(population,2) - 1);
+        end
+    end

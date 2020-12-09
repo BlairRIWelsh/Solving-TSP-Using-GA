@@ -1,35 +1,29 @@
-% example of TSP problem
-% solved using genetic algorithm 
+%% INFORMATION
+% Name: Blair Welsh
+% Student ID: 34740627
+% Example of TSP problem solved using genetic algorithm 
+
+%% Load in data points
 
 clear all;
 load('xy.mat');
+tic;
 chromasome_size = size(xy,1);
 
-iter = 1000;                    % Number of iterations: repeat "iter" times 
-population_size = 200;           % Number of chromosomes in population
-replacementChoice = "elitism";
-selectionChoice = 'roulette';
-crossoverChoice = 'cx2';    % CHOICES: 'pmx', 'cx2', 'ox'
-crossoverProbability = 0.8;
-mutationChoice = "rsm";   % CHOICES: 'twors', 'thrors', 'rsm'
-mutationProbability = 0.2;
-
-displayShortestDistOverEveryGenPlot = true;
+%% Display Graphs?
 displayShortestRoutePlot = true;
 
-%% Find distances between points
-distances_between_points = zeros(chromasome_size,chromasome_size);
-for i=1:size(xy,1)
-    for j = i + 1:size(xy,1)
-        distance = sqrt((xy(i,2)-xy(i,1))^2 + (xy(j,2)-xy(j,1))^2);
-        distances_between_points(j,i) = distance;
-        distances_between_points(i,j) = distance;
-    end
-end
-
-%% Set up matrices to record each generations stats
-bestFitScoreEachGen = zeros(1,iter);
-avgFitScoreEachGen = zeros(1,iter);
+%% Parameter Selection
+iter = 1000;                                        % Number of iterations: repeat "iter" times 
+population_size = 100;                              % Number of chromosomes in population
+replacementChoice = "elitism";                      % CHOICES: 'elitism', 'generational', 'random'
+replacementSize = 2;                                % Number of members of last generation to keep using elitism or random replacment
+selectionChoice = 'tournamentWithReplacement';      % CHOICES: 'roulette', 'tournamentWithoutReplacement', 'tournamentWithReplacement'
+tournamentSelectionSize = 4;                        % Size of tournament when using tournament selection
+crossoverChoice = 'pmx';                            % CHOICES: 'pmx', 'cx2', 'ox'
+crossoverProbability = 0.8;                         % Chance of selected parents crossing over
+mutationChoice = "rsm";                             % CHOICES: 'twors', 'thrors', 'rsm'
+mutationProbability = 0.2;                          % Chance of new child chromosomes mutating
 
 %% Generates a random population using Permutation Encoding
 population = GenerateRandomPopulation(population_size,chromasome_size);
@@ -38,20 +32,16 @@ population = GenerateRandomPopulation(population_size,chromasome_size);
 for k = 1:iter
 
     % Get the fitness scores of the current population
-    population = FitnessFunction(population, distances_between_points);
+    population = FitnessFunction(population, xy);
     
-    % Save best and average Fitness score for this generation
-    bestFitScoreEachGen(1,k) = max(population(:,chromasome_size+1));
-    avgFitScoreEachGen(1,k) = mean(population(:,chromasome_size+1));
-   
     % Keep some members of the old generation in the new one
-    [populationNew, populationNewNum] = Replacement(population,replacementChoice);
+    [populationNew, populationNewNum] = Replacement(population,replacementChoice,replacementSize);
 
     %% For every other space left in the new population, fill it with new child chromasomes
     while (populationNewNum < population_size)
             
         % Select two parents from the old population
-        [parent_chromosome_1,parent_chromosome_2] = Selection(population,selectionChoice);
+        [parent_chromosome_1,parent_chromosome_2] = Selection(population,selectionChoice,tournamentSelectionSize);
         
         % Crossover them to form 2 new child chromosomes
         [child_chromosome_1,child_chromosome_2] = Crossover(parent_chromosome_1,parent_chromosome_2,crossoverProbability,crossoverChoice);
@@ -59,15 +49,14 @@ for k = 1:iter
         % Mutate those two children
         [child_chromosome_1,child_chromosome_2] = Mutation(child_chromosome_1,child_chromosome_2,mutationProbability,mutationChoice);
         
-        % Check child 1 does not already exist in populaion
-        if ~ismember(child_chromosome_1, populationNew,'rows')
+        % Check child 1 does not already exist in populaion and does not contain 0
+        if ((~ismember(child_chromosome_1, populationNew,'rows')) && (~ismember(0,child_chromosome_1)))
             % Add child 1 to population
             populationNewNum = populationNewNum + 1;
             populationNew(populationNewNum,:) = child_chromosome_1;
         end
-        % Check child 2 does not already exist in populaion and that
-        % population is not full
-        if ((~ismember(child_chromosome_2, populationNew,'rows')) && (populationNewNum < population_size))
+        % Check child 2 does not already exist in population, does not contain 0 and that population is not full
+        if ((~ismember(child_chromosome_2, populationNew,'rows')) && (populationNewNum < population_size) && (~ismember(0,child_chromosome_1)))
             % Add child 2 to population
             populationNewNum = populationNewNum + 1;
             populationNew(populationNewNum,:) = child_chromosome_2;
@@ -75,51 +64,19 @@ for k = 1:iter
 
     end
     
-    % New population becomes the old population
-    population = populationNew;
-    population = population(:,1:chromasome_size);
+    population = populationNew;                     % New population becomes the old population
+    population = population(:,1:chromasome_size);   % Drop fitness score collumn
     
 end
 
 %% Find the shortest route of the Final Generation
 % Get the fitness scores of the last population
-population = FitnessFunction(population, distances_between_points);
+population = FitnessFunction(population, xy);
 
-% Find the shortest route
+% Find the shortest route and distance it took
 [shortestRouteFitnessScore,shortestRouteIndex] = max(population(:,chromasome_size+1)); % biggest fitness score / lowest distance in last population
 shortestRouteDistance = 1/shortestRouteFitnessScore;
 shortestRoute = population(shortestRouteIndex,1:chromasome_size);
-
-%% Add final generation stats to matrices, and change them from Fitness Score to Distance
-% bestFitScoreEachGen(1,iter+1) = shortestRouteFitnessScore;
-% avgFitScoreEachGen(1,iter+1) = mean(population(:,chromasome_size+1));
-bestFitScoreEachGen = 1 ./ bestFitScoreEachGen;
-avgFitScoreEachGen = 1 ./ avgFitScoreEachGen;
-
-%% Print information about the last run
-fprintf('\n*** RUN COMPLETE ***\n');
-fprintf('Population Size: %d \nIterations: %d\n',population_size,iter);
-fprintf('Replacement: "%s"\n',replacementChoice);
-fprintf('Selection: "%s"\n',selectionChoice);
-fprintf('Crossover: "%s" at %d%% probabilty\n',crossoverChoice, crossoverProbability*100);
-fprintf('Mutation: "%s" at %d%% probabilty\n\n',mutationChoice, mutationProbability*100);
-fprintf('Shortest Route Distance last Generation: %f\n',shortestRouteDistance);
-fprintf('Average Shortest Distance last Generation: %f\n\n',avgFitScoreEachGen(iter));
-
-%% Display plot of the Shortest Distance in every generation
-if (displayShortestDistOverEveryGenPlot == true)
-    f1 = figure('Name','Shortest Distance Every Generation Plot','Numbertitle','off');
-    figure(f1);
-    [shortestDistance,shortestDistanceIdx] = min(bestFitScoreEachGen);
-    plot(1:iter,bestFitScoreEachGen);
-    hold on
-    plot(shortestDistanceIdx, shortestDistance, '^r');
-    hold off
-    title('Shortest Distance Across All Generations');
-    xlabel('Generation');
-    ylabel('Distance');
-    legend('Shortest Distance Every Generation ', sprintf('Shortest Distance Overall = %0.10f',shortestDistance),'Location','northoutside')
-end
 
 %% Display plot of the Shortest Route
 if (displayShortestRoutePlot == true)
@@ -132,5 +89,23 @@ if (displayShortestRoutePlot == true)
     subplot(2,2,2);
     rte = shortestRoute([1:100 1]);
     plot(xy(rte,1),xy(rte,2),'r.-');
-    title(sprintf('Total Distance = %1.4f',shortestDistance));
+    title(sprintf('Total Distance = %1.4f',shortestRouteDistance));
 end
+
+%% Print information about the last run
+fprintf('\n*** RUN COMPLETE ***\n');
+fprintf('Population Size: %d \nIterations: %d\n',population_size,iter);
+if strcmp(selectionChoice,'tournamentWithoutReplacement') || strcmp(selectionChoice,'tournamentWithReplacement')
+    fprintf('Replacement: "%s" with %d Chromosomes\n',replacementChoice,replacementSize);
+else
+    fprintf('Replacement: "%s"\n',replacementChoice);
+end
+if strcmp(selectionChoice,'tournamentWithoutReplacement') || strcmp(selectionChoice,'tournamentWithReplacement')
+    fprintf('Selection: "%s" with Tournament Size: %d\n',selectionChoice,tournamentSelectionSize);
+else
+    fprintf('Selection: "%s"\n',selectionChoice);
+end
+fprintf('Crossover: "%s" at %d%% probabilty\n',crossoverChoice, crossoverProbability*100);
+fprintf('Mutation: "%s" at %d%% probabilty\n\n',mutationChoice, mutationProbability*100);
+toc;
+fprintf('Shortest Route Distance last Generation: %f\n\n',shortestRouteDistance);

@@ -74,5 +74,3 @@ function [lb,ub] = generateCutPoints(chromosome_size)
     if ub-lb == 1 || ub == lb
         [lb,ub] = generateCutPoints(chromosome_size);
     end
-    
-    
