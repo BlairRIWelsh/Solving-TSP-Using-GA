@@ -50,8 +50,8 @@ function temp_chromasome = tournamentWithoutReplacement(population,tournamentSel
         selectedChromasomes(i,:) = population(x,:);
     end
     
-    [m,idx] = max(selectedChromasomes(:,101));;     % Find index of shortest route
-    temp_chromasome = selectedChromasomes(idx,1:size(population,2) - 1); % Return shortest route chromasome
+    [m,idx] = max(selectedChromasomes(size(population,2)));     % Find index of shortest route
+    temp_chromasome = population(idx,1:size(population,2) - 1); % Return shortest route chromasome
 
 %% Randomly select n chromasomes from the population, removing chromosomes that have been selected already, and select the best one from this group
 function [temp_chromasome_1, temp_chromasome_2] = tournamentWithReplacement(population,tournamentSelectionSize)
@@ -68,10 +68,10 @@ function [temp_chromasome_1, temp_chromasome_2] = tournamentWithReplacement(popu
             selectedChromasomes(i,:) = population(x,:);
             usedChromasomes(i) = x;
         end
-        [m,idx] = max(selectedChromasomes(:,101));
+        [m,idx] = max(selectedChromasomes(1,101));
         if loop == 1
-            temp_chromasome_1 = selectedChromasomes(idx,1:size(population,2) - 1);
+            temp_chromasome_1 = population(idx,1:size(population,2) - 1);
         else
-            temp_chromasome_2 = selectedChromasomes(idx,1:size(population,2) - 1);
+            temp_chromasome_2 = population(idx,1:size(population,2) - 1);
         end
     end

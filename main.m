@@ -14,13 +14,13 @@ chromasome_size = size(xy,1);
 displayShortestRoutePlot = true;
 
 %% Parameter Selection
-iter = 1000;                                        % Number of iterations: repeat "iter" times 
-population_size = 100;                              % Number of chromosomes in population
+iter = 1500;                                        % Number of iterations: repeat "iter" times 
+population_size = 150;                              % Number of chromosomes in population
 replacementChoice = "elitism";                      % CHOICES: 'elitism', 'generational', 'random'
 replacementSize = 2;                                % Number of members of last generation to keep using elitism or random replacment
 selectionChoice = 'tournamentWithReplacement';      % CHOICES: 'roulette', 'tournamentWithoutReplacement', 'tournamentWithReplacement'
-tournamentSelectionSize = 4;                        % Size of tournament when using tournament selection
-crossoverChoice = 'pmx';                            % CHOICES: 'pmx', 'cx2', 'ox'
+tournamentSelectionSize = 5;                        % Size of tournament when using tournament selection
+crossoverChoice = 'pmx';                            % CHOICES: 'pmx', 'ox,'cx2'
 crossoverProbability = 0.8;                         % Chance of selected parents crossing over
 mutationChoice = "rsm";                             % CHOICES: 'twors', 'thrors', 'rsm'
 mutationProbability = 0.2;                          % Chance of new child chromosomes mutating

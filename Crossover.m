@@ -19,6 +19,9 @@ function [child1,child2] = Crossover(chromosome_1,chromosome_2,crossoverProbabil
                 % PARTIALLY MATCHED CROSSOVER (PMX)
                 [child1,child2] = CrossoverPMX(chromosome_1,chromosome_2);
         end
+    else
+        child1 = chromosome_1;
+        child2 = chromosome_2;
     end
     
     
@@ -58,12 +61,40 @@ function [child1,child2] = CrossoverCX2(parent1,parent2)
     end
     
 function [child1,child2] = CrossoverOX(parent1,parent2)
-
     [lb,ub] = generateCutPoints(size(parent1,2));
+   
+    t = parent1;
+    s = parent2;
     
-    child1 = zeros(parent1);
-    child1(1,lb:ub) = parent1(1,lb:ub);
-    child2 = parent2;
+    for loop=1:2
+        child1 = zeros(size(t));
+        child1(1,lb:ub) = t(1,lb:ub);
+        for k=1:lb-1
+            for i=1:size(s,2)
+                if ~ismember(s(i),child1)
+                    child1(k) = s(i);
+                    break;
+                end
+            end
+        end
+
+        for k=ub+1:size(parent1,2)
+            for i=1:size(s,2)
+                if ~ismember(s(i),child1)
+                    child1(k) = s(i);
+                    break;
+                end
+            end
+        end
+        if loop ==1
+            child2 = child1;
+            
+            temp = t;
+            t = s;
+            s =temp;
+        end
+    end
+    
     
 function [child1,child2] = CrossoverPMX(parent1,parent2)
     cutPoint = randi([1,size(parent1,2)]);
